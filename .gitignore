@@ -1,0 +1,9 @@
+pycache/
+.pyc
+.venv/
+.idea/
+.vscode/
+data/raw/
+results/.pt
+results/*.ckpt
+logs/

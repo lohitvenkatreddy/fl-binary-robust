@@ -1,0 +1,67 @@
+project:
+  name: fl-binary-robust
+  seed: 42
+
+data:
+  dataset: cifar10
+  two_class: true
+  class_ids: [1, 9]        # 1=automobile, 9=truck (change if needed)
+  val_frac: 0.02
+  normalize: true
+  augment: standard        # mild flip/crop; keep triggers evaluable later
+
+partition:
+  scheme: dirichlet        # keep, even if you start with IID file
+  alpha: 0.3
+  num_clients: 50
+  iid_baseline: true
+
+fl:
+  rounds: 200
+  clients_per_round: 10    # q*N = 0.2
+  local_epochs: 1
+  batch_size: 64
+  optimizer: sgd
+  lr: 0.01
+  weight_decay: 0.0005
+  momentum: 0.9
+
+model:
+  backbone: resnet8
+  head: binary             # sigmoid + BCE
+
+attacks:
+  enabled: false
+  adversary_frac: 0.2
+  label_flip_rate: 0.3
+  poison_rate: 0.3
+  backdoor:
+    enabled: false
+    trigger_rate: 0.05
+    pattern: corner_3x3
+    target_label: 1
+
+anomaly:
+  warmup_rounds: 10
+  stats: [l2, linf, cos, zscore, dispersion]
+  deep_features: false
+  threshold_strategy: percentile
+  drop_threshold_p: 99.0
+
+trust:
+  enabled: false
+  ema_decay: 0.95
+  tau_min: 0.1
+  tau_max: 2.0
+
+aggregation:
+  method: fedavg
+  safety_prior:
+    enabled: false
+    robust_rule: median
+    blend_on_dispersion: true
+
+logging:
+  out_dir: results
+  log_jsonl: true
+  ckpt_every: 20
